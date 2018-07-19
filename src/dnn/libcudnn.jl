@@ -147,7 +147,7 @@ function cudnnConvolutionBiasActivationForward(y::CuArray{T,N}, x::CuArray{T,N},
                                                activationMode=CUDNN_ACTIVATION_IDENTITY, activationCoeff=0.0,
                                                activationReluNanOpt=CUDNN_NOT_PROPAGATE_NAN, z=C_NULL) where {T,N}
     cd = ConvDesc(T, N-2, padding, stride, upscale, mode)
-    ad = ActivationDesc(activationMode, activationCoeff, activationReluNanOpt)
+    ad = ActivationDesc(activationMode, T(activationCoeff), activationReluNanOpt)
     cudnnConvolutionBiasActivationForward(handle,Ref(T(alpha1)),TensorDesc(x),x,FilterDesc(w),w,cd,workSpace,
         workSpaceSizeInBytes,Ref(T(alpha2)),TensorDesc(y),z,TensorDesc(bias),bias,ad,TensorDesc(y),y)
     return y # If this fails to work send y in place of z
@@ -228,5 +228,42 @@ function cudnnPoolingBackward(dx::CuArray{T,N}, dy::CuArray{T,N}, x::CuArray{T,N
     pd = PoolDesc(N-2, window, padding, stride, mode)
     cudnnPoolingBackward(handle, pd, Ref(T(alpha)), TensorDesc(y), y,
                          TensorDesc(dy), dy, TensorDesc(x), x, Ref(T(beta)), TensorDesc(dx), dx)
+    return dx
+end
+
+function cudnnActivationForward(handle, activationDesc, alpha, xDesc, x, beta, yDesc, y)
+    @check ccall((::cudnnActivationForward, libcudnn), cudnnStatus_t, (cudnnHandle_t, cudnnActivationDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}), handle, activationDesc, alpha, xDesc, x, beta, yDesc, y)
+end
+
+function cudnnActivationForward(y::CuArray{T,N}, x::CuArray{T,N}; handle=libcudnn_handle[], mode=CUDNN_ACTIVATION_IDENTITY,
+                                coeff=0.0, reluNanOpt=CUDNN_NOT_PROPAGATE_NAN, alpha=1, beta=0) where {T,N}
+    ad = ActivationDesc(mode, T(coeff), reluNanOpt)
+    cudnnActivationBackward(handle, ad, Ref(T(alpha)), TensorDesc(x), x, Ref(T(beta)), TensorDesc(y), y)
+    return y
+end
+
+# cudnnStatus_t cudnnActivationBackward(
+#     cudnnHandle_t                    handle,
+#     cudnnActivationDescriptor_t      activationDesc,
+#     const void                      *alpha,
+#     const cudnnTensorDescriptor_t    yDesc,
+#     const void                      *y,
+#     const cudnnTensorDescriptor_t    dyDesc,
+#     const void                      *dy,
+#     const cudnnTensorDescriptor_t    xDesc,
+#     const void                      *x,
+#     const void                      *beta,
+#     const cudnnTensorDescriptor_t    dxDesc,
+#     void                            *dx)
+
+function cudnnActivationBackward(handle, activationDesc, alpha, yDesc, y, dyDesc, dy, xDesc, x, beta, dxDesc, dx)
+    @check ccall((:cudnnActivationBackward, libcudnn), cudnnStatus_t, (cudnnHandle_t, cudnnActivationDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}), handle, activationDesc, alpha, yDesc, y, dyDesc, dy, xDesc, x, beta, dxDesc, dx)
+end
+
+function cudnnActivationBackward(dx::CuArray{T,N}, x::CuArray{T,N}, y::CuArray{T,N}, dy::CuArray{T,N};
+                                 handle=libcudnn_handle[], mode=CUDNN_ACTIVATION_IDENTITY, coeff=0.0,
+                                 reluNanOpt=CUDNN_NOT_PROPAGATE_NAN, alpha=1, beta=0) where {T,N}
+    ad = ActivationDesc(mode, T(coeff), reluNanOpt)
+    cudnnActivationBackward(handle, ad, Ref(T(alpha)), TensorDesc(y), y, TensorDesc(dy), dy, TensorDesc(x), x, Ref(T(beta)), TensorDesc(dx), dx)
     return dx
 end
