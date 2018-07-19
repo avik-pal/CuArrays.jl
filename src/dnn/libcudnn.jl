@@ -90,6 +90,22 @@ function cudnnDestroyPoolingDescriptor(poolingDesc)
     ccall((:cudnnDestroyPoolingDescriptor,libcudnn),cudnnStatus_t,(cudnnPoolingDescriptor_t,),poolingDesc)
 end
 
+function cudnnSetActivationDescriptor(activationDesc, mode, reluNanOpt, coeff)
+    ccall((:cudnnSetActivationDescriptor,libcudnn),cudnnStatus_t,(cudnnActivationDescriptor_t,cudnnActivationMode_t,cudnnNanPropagation_t,Cdouble),activationDesc,mode,reluNanOpt,coeff)
+end
+
+function cudnnGetActivationDescriptor(activationDesc, mode, reluNanOpt, coeff)
+    ccall((:cudnnGetActivationDescriptor,libcudnn),cudnnStatus_t,(cudnnActivationDescriptor_t,Ptr{cudnnActivationMode_t},Ptr{cudnnNanPropagation_t},Ptr{Cdouble}),activationDesc,mode,reluNanOpt,coeff)
+end
+
+function cudnnCreateActivationDescriptor(activationDesc)
+    ccall((:cudnnCreateActivationDescriptor,libcudnn),cudnnStatus_t,(Ptr{cudnnActivationDescriptor_t},),activationDesc)
+end
+
+function cudnnDestroyActivationDescriptor(activationDesc)
+    ccall((:cudnnDestroyActivationDescriptor,libcudnn),cudnnStatus_t,(cudnnActivationDescriptor_t,),activationDesc)
+end
+
 function cudnnSoftmaxForward(handle,algo,mode,alpha,xDesc,x,beta,yDesc,y)
     @check ccall((:cudnnSoftmaxForward,libcudnn),cudnnStatus_t,(cudnnHandle_t,cudnnSoftmaxAlgorithm_t,cudnnSoftmaxMode_t,Ptr{Void},cudnnTensorDescriptor_t,Ptr{Void},Ptr{Void},cudnnTensorDescriptor_t,Ptr{Void}),handle,algo,mode,alpha,xDesc,x,beta,yDesc,y)
 end
@@ -119,6 +135,42 @@ function cudnnSoftmaxBackward(src::CuArray{T,4}, srcDiff::CuArray{T,4}, destDiff
                          TensorDesc(srcDiff), srcDiff,
                          cptr(beta, destDiff), TensorDesc(destDiff), destDiff)
     return destDiff
+end
+
+# cudnnStatus_t cudnnConvolutionBiasActivationForward(
+#     cudnnHandle_t                       handle,
+#     const void                         *alpha1,
+#     const cudnnTensorDescriptor_t       xDesc,
+#     const void                         *x,
+#     const cudnnFilterDescriptor_t       wDesc,
+#     const void                         *w,
+#     const cudnnConvolutionDescriptor_t  convDesc,
+#     cudnnConvolutionFwdAlgo_t           algo,
+#     void                               *workSpace,
+#     size_t                              workSpaceSizeInBytes,
+#     const void                         *alpha2,
+#     const cudnnTensorDescriptor_t       zDesc,
+#     const void                         *z,
+#     const cudnnTensorDescriptor_t       biasDesc,
+#     const void                         *bias,
+#     const cudnnActivationDescriptor_t   activationDesc,
+#     const cudnnTensorDescriptor_t       yDesc,
+#     void                               *y)
+
+function cudnnConvolutionBiasActivationForward(handle, alpha1, xDesc, x, wDesc, w, convDesc, algo, workSpace, workSpaceSizeInBytes, alpha2, zDesc, z, biasDesc, bias, activationDesc, yDesc, y)
+    @check ccall((:cudnnConvolutionBiasActivationForward, libcudnn), cudnnStatus_t, (cudnnHandle_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnFilterDescriptor_t, Ptr{Void}, cudnnConvolutionDescriptor_t, cudnnConvolutionFwdAlgo_t, Ptr{Void}, Csize_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnActivationDescriptor_t, cudnnTensorDescriptor_t, Ptr{Void}), handle, alpha1, xDesc, x, wDesc, w, convDesc, algo, workSpace, workSpaceSizeInBytes, alpha2, zDesc, z, biasDesc, bias, activationDesc, yDesc, y)
+end
+
+function cudnnConvolutionBiasActivationForward(y::CuArray{T,N}, x::CuArray{T,N}, w::CuArray{T,N}, bias::CuArray{T,N};
+                                               handle=libcudnn_handle[], alpha1=1, workSpace=C_NULL, workSpaceSizeInBytes=0,
+                                               alpha2=0, padding=0, stride=1, upscale=1, mode=0,
+                                               activationMode=CUDNN_ACTIVATION_IDENTITY, activationCoeff=0.0,
+                                               activationReluNanOpt=CUDNN_NOT_PROPAGATE_NAN, z=C_NULL) where {T,N}
+    cd = ConvDesc(T, N-2, padding, stride, upscale, mode)
+    ad = ActivationDesc(activationMode, activationCoeff, activationReluNanOpt)
+    cudnnConvolutionBiasActivationForward(handle,Ref(T(alpha1)),TensorDesc(x),x,FilterDesc(w),w,cd,workSpace,
+        workSpaceSizeInBytes,Ref(T(alpha2)),TensorDesc(y),z,TensorDesc(bias),bias,ad,TensorDesc(y),y)
+    return y # If this fails to work send y in place of z
 end
 
 function cudnnConvolutionForward(handle, alpha, xDesc, x, wDesc, w, convDesc, algo, workSpace, workSpaceSizeInBytes, beta, yDesc, y)

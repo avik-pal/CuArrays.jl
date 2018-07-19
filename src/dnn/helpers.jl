@@ -115,3 +115,16 @@ function PoolDesc(nd, window, padding, stride, mode, maxpoolingNanOpt=CUDNN_NOT_
     finalizer(this, free)
     return this
 end
+
+mutable struct ActivationDesc; ptr; end
+free(ad::ActivationDesc)=cudnnDestroyActivationDescriptor(ad.ptr)
+Base.unsafe_convert(::Type{cudnnActivationDescriptor_t}, ad::ActivationDesc)=ad.ptr
+
+function ActivationDesc(mode, coeff=0.0, reluNanOpt=CUDNN_NOT_PROPAGATE_NAN)
+    ad = cudnnActivationDescriptor_t[0]
+    cudnnCreateActivationDescriptor(ad)
+    cudnnSetActivationDescriptor(ad[1],mode,reluNanOpt,coef)
+    this = ActivationDesc(ad[1])
+    finalizer(this, free)
+    return this
+end
