@@ -137,26 +137,6 @@ function cudnnSoftmaxBackward(src::CuArray{T,4}, srcDiff::CuArray{T,4}, destDiff
     return destDiff
 end
 
-# cudnnStatus_t cudnnConvolutionBiasActivationForward(
-#     cudnnHandle_t                       handle,
-#     const void                         *alpha1,
-#     const cudnnTensorDescriptor_t       xDesc,
-#     const void                         *x,
-#     const cudnnFilterDescriptor_t       wDesc,
-#     const void                         *w,
-#     const cudnnConvolutionDescriptor_t  convDesc,
-#     cudnnConvolutionFwdAlgo_t           algo,
-#     void                               *workSpace,
-#     size_t                              workSpaceSizeInBytes,
-#     const void                         *alpha2,
-#     const cudnnTensorDescriptor_t       zDesc,
-#     const void                         *z,
-#     const cudnnTensorDescriptor_t       biasDesc,
-#     const void                         *bias,
-#     const cudnnActivationDescriptor_t   activationDesc,
-#     const cudnnTensorDescriptor_t       yDesc,
-#     void                               *y)
-
 function cudnnConvolutionBiasActivationForward(handle, alpha1, xDesc, x, wDesc, w, convDesc, algo, workSpace, workSpaceSizeInBytes, alpha2, zDesc, z, biasDesc, bias, activationDesc, yDesc, y)
     @check ccall((:cudnnConvolutionBiasActivationForward, libcudnn), cudnnStatus_t, (cudnnHandle_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnFilterDescriptor_t, Ptr{Void}, cudnnConvolutionDescriptor_t, cudnnConvolutionFwdAlgo_t, Ptr{Void}, Csize_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnActivationDescriptor_t, cudnnTensorDescriptor_t, Ptr{Void}), handle, alpha1, xDesc, x, wDesc, w, convDesc, algo, workSpace, workSpaceSizeInBytes, alpha2, zDesc, z, biasDesc, bias, activationDesc, yDesc, y)
 end
