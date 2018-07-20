@@ -120,7 +120,7 @@ mutable struct ActivationDesc; ptr; end
 free(ad::ActivationDesc)=cudnnDestroyActivationDescriptor(ad.ptr)
 Base.unsafe_convert(::Type{cudnnActivationDescriptor_t}, ad::ActivationDesc)=ad.ptr
 
-function ActivationDesc(mode, coeff=0.0, reluNanOpt=CUDNN_NOT_PROPAGATE_NAN)
+function ActivationDesc(mode, coeff, reluNanOpt=CUDNN_NOT_PROPAGATE_NAN)
     ad = cudnnActivationDescriptor_t[0]
     cudnnCreateActivationDescriptor(ad)
     cudnnSetActivationDescriptor(ad[1],mode,reluNanOpt,coef)

@@ -232,7 +232,7 @@ function cudnnPoolingBackward(dx::CuArray{T,N}, dy::CuArray{T,N}, x::CuArray{T,N
 end
 
 function cudnnActivationForward(handle, activationDesc, alpha, xDesc, x, beta, yDesc, y)
-    @check ccall((::cudnnActivationForward, libcudnn), cudnnStatus_t, (cudnnHandle_t, cudnnActivationDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}), handle, activationDesc, alpha, xDesc, x, beta, yDesc, y)
+    @check ccall((:cudnnActivationForward, libcudnn), cudnnStatus_t, (cudnnHandle_t, cudnnActivationDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}), handle, activationDesc, alpha, xDesc, x, beta, yDesc, y)
 end
 
 function cudnnActivationForward(y::CuArray{T,N}, x::CuArray{T,N}; handle=libcudnn_handle[], mode=CUDNN_ACTIVATION_IDENTITY,
