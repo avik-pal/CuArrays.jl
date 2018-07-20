@@ -34,7 +34,7 @@ mutable struct cudnnConvolutionStruct
 end
 
 const cudnnConvolutionDescriptor_t = Ptr{cudnnConvolutionStruct}
-https://pastebin.com/DcSg4tkV
+
 mutable struct cudnnPoolingStruct
 end
 
