@@ -137,20 +137,20 @@ function cudnnSoftmaxBackward(src::CuArray{T,4}, srcDiff::CuArray{T,4}, destDiff
     return destDiff
 end
 
-function cudnnConvolutionBiasActivationForward(handle, alpha1, xDesc, x, wDesc, w, convDesc, algo, workSpace, workSpaceSizeInBytes, alpha2, zDesc, z, biasDesc, bias, activationDesc, yDesc, y)
-    @check ccall((:cudnnConvolutionBiasActivationForward, libcudnn), cudnnStatus_t, (cudnnHandle_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnFilterDescriptor_t, Ptr{Void}, cudnnConvolutionDescriptor_t, cudnnConvolutionFwdAlgo_t, Ptr{Void}, Csize_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnActivationDescriptor_t, cudnnTensorDescriptor_t, Ptr{Void}), handle, alpha1, xDesc, x, wDesc, w, convDesc, algo, workSpace, workSpaceSizeInBytes, alpha2, zDesc, z, biasDesc, bias, activationDesc, yDesc, y)
+function cudnnConvolutionBiasActivationForward(handle, alpha1, xDesc, x, wDesc, w, convDesc, algo, workSpace, workSpaceSizeInBytes, alpha2, biasDesc, bias, activationDesc, yDesc, y)
+    @check ccall((:cudnnConvolutionBiasActivationForward, libcudnn), cudnnStatus_t, (cudnnHandle_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnFilterDescriptor_t, Ptr{Void}, cudnnConvolutionDescriptor_t, cudnnConvolutionFwdAlgo_t, Ptr{Void}, Csize_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnActivationDescriptor_t, cudnnTensorDescriptor_t, Ptr{Void}), handle, alpha1, xDesc, x, wDesc, w, convDesc, algo, workSpace, workSpaceSizeInBytes, alpha2, yDesc, y, biasDesc, bias, activationDesc, yDesc, y)
 end
 
 function cudnnConvolutionBiasActivationForward(y::CuArray{T,N}, x::CuArray{T,N}, w::CuArray{T,N}, bias::CuArray{T,N};
                                                handle=libcudnn_handle[], alpha1=1, workSpace=C_NULL, workSpaceSizeInBytes=0,
                                                alpha2=0, padding=0, stride=1, upscale=1, mode=0,
                                                activationMode=CUDNN_ACTIVATION_IDENTITY, activationCoeff=0.0,
-                                               activationReluNanOpt=CUDNN_NOT_PROPAGATE_NAN, z=C_NULL) where {T,N}
+                                               activationReluNanOpt=CUDNN_NOT_PROPAGATE_NAN) where {T,N}
     cd = ConvDesc(T, N-2, padding, stride, upscale, mode)
     ad = ActivationDesc(activationMode, T(activationCoeff), activationReluNanOpt)
     cudnnConvolutionBiasActivationForward(handle,Ref(T(alpha1)),TensorDesc(x),x,FilterDesc(w),w,cd,workSpace,
-        workSpaceSizeInBytes,Ref(T(alpha2)),TensorDesc(y),z,TensorDesc(bias),bias,ad,TensorDesc(y),y)
-    return y # If this fails to work send y in place of z
+        workSpaceSizeInBytes,Ref(T(alpha2)),TensorDesc(y),y,TensorDesc(bias),bias,ad,TensorDesc(y),y)
+    return y
 end
 
 function cudnnConvolutionForward(handle, alpha, xDesc, x, wDesc, w, convDesc, algo, workSpace, workSpaceSizeInBytes, beta, yDesc, y)
@@ -241,20 +241,6 @@ function cudnnActivationForward(y::CuArray{T,N}, x::CuArray{T,N}; handle=libcudn
     cudnnActivationBackward(handle, ad, Ref(T(alpha)), TensorDesc(x), x, Ref(T(beta)), TensorDesc(y), y)
     return y
 end
-
-# cudnnStatus_t cudnnActivationBackward(
-#     cudnnHandle_t                    handle,
-#     cudnnActivationDescriptor_t      activationDesc,
-#     const void                      *alpha,
-#     const cudnnTensorDescriptor_t    yDesc,
-#     const void                      *y,
-#     const cudnnTensorDescriptor_t    dyDesc,
-#     const void                      *dy,
-#     const cudnnTensorDescriptor_t    xDesc,
-#     const void                      *x,
-#     const void                      *beta,
-#     const cudnnTensorDescriptor_t    dxDesc,
-#     void                            *dx)
 
 function cudnnActivationBackward(handle, activationDesc, alpha, yDesc, y, dyDesc, dy, xDesc, x, beta, dxDesc, dx)
     @check ccall((:cudnnActivationBackward, libcudnn), cudnnStatus_t, (cudnnHandle_t, cudnnActivationDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}), handle, activationDesc, alpha, yDesc, y, dyDesc, dy, xDesc, x, beta, dxDesc, dx)
