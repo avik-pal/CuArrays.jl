@@ -143,13 +143,13 @@ end
 
 function cudnnConvolutionBiasActivationForward(y::CuArray{T,N}, x::CuArray{T,N}, w::CuArray{T,N}, bias::CuArray{T,N};
                                                handle=libcudnn_handle[], alpha1=1, workSpace=C_NULL, workSpaceSizeInBytes=0,
-                                               alpha2=0, padding=0, stride=1, upscale=1, mode=0,
+                                               algo=0, alpha2=0, padding=0, stride=1, upscale=1, mode=0,
                                                activationMode=CUDNN_ACTIVATION_IDENTITY, activationCoeff=0.0,
                                                activationReluNanOpt=CUDNN_NOT_PROPAGATE_NAN) where {T,N}
     cd = ConvDesc(T, N-2, padding, stride, upscale, mode)
     ad = ActivationDesc(activationMode, T(activationCoeff), activationReluNanOpt)
-    cudnnConvolutionBiasActivationForward(handle,Ref(T(alpha1)),TensorDesc(x),x,FilterDesc(w),w,cd,workSpace,
-        workSpaceSizeInBytes,Ref(T(alpha2)),TensorDesc(y),y,TensorDesc(bias),bias,ad,TensorDesc(y),y)
+    cudnnConvolutionBiasActivationForward(handle,Ref(T(alpha1)),TensorDesc(x),x,FilterDesc(w),w,cd,algo,workSpace,
+        workSpaceSizeInBytes,Ref(T(alpha2)),TensorDesc(bias),bias,ad,TensorDesc(y),y)
     return y
 end
 
