@@ -66,13 +66,6 @@ function conv!(y::A, x::A, w::A;
   cudnnConvolutionForward(y, x, w, padding=pad, stride=stride, mode=mode, alpha=alpha)
 end
 
-function conv!(y::A, x::A, w::A, b::A;
-               pad = 0, stride = 1, mode = 0,
-               alpha = 1, dilation = 1, activationMode = 5) where A<:CuArray{<:CUDNNFloat}
-  all(x -> x == 1, dilation) || error("Only dilation = 1 is supported in CuArrays")
-  cudnnConvolutionBiasActivationForward(y, x, w, b, padding=pad, stride=stride, mode=mode, alpha1=alpha, activationMode=activationMode)
-end
-
 function ∇conv_filter!(dw::A, dy::A, x::A, w::A;
                        pad = 0, stride = 1, mode = 0,
                        alpha = 1, dilation = 1) where A<:CuArray{<:CUDNNFloat}
