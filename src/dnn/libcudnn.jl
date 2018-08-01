@@ -254,3 +254,15 @@ function cudnnActivationBackward(dx::CuArray{T,N}, x::CuArray{T,N}, y::CuArray{T
     cudnnActivationBackward(handle, ad, Ref(T(alpha)), TensorDesc(y), y, TensorDesc(dy), dy, TensorDesc(x), x, Ref(T(beta)), TensorDesc(dx), dx)
     return dx
 end
+
+function cudnnAddTensor(handle, alpha, aDesc, A, beta, cDesc, C)
+    @check ccall((:cudnnAddTensor, libcudnn), cudnnStatus_t, (cudnnHandle_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}), handle, alpha, aDesc, A, beta, cDesc, C)
+end
+
+function cudnnAddTensor(A::CuArray{T,N}, C::CuArray{T,N}; handle=libcudnn_handle[], alpha=1,
+                        beta=1) where {T,N}
+    aDesc = TensorDesc(A)
+    cDesc = TensorDesc(C)
+    cudnnAddTensor(handle, Ref(T(alpha)), aDesc, A, Ref(T(beta)), cDesc, C)
+    return C
+end
