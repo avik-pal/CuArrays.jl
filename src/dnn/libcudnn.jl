@@ -138,7 +138,7 @@ function cudnnSoftmaxBackward(src::CuArray{T,4}, srcDiff::CuArray{T,4}, destDiff
 end
 
 function cudnnConvolutionBiasActivationForward(handle, alpha1, xDesc, x, wDesc, w, convDesc, algo, workSpace, workSpaceSizeInBytes, alpha2, biasDesc, bias, activationDesc, yDesc, y)
-    @check ccall((:cudnnConvolutionBiasActivationForward, libcudnn), cudnnStatus_t, (cudnnHandle_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnFilterDescriptor_t, Ptr{Void}, cudnnConvolutionDescriptor_t, cudnnConvolutionFwdAlgo_t, Ptr{Void}, Csize_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnActivationDescriptor_t, cudnnTensorDescriptor_t, Ptr{Void}), handle, alpha1, xDesc, x, wDesc, w, convDesc, algo, workSpace, workSpaceSizeInBytes, alpha2, yDesc, y, biasDesc, bias, activationDesc, yDesc, y)
+    @check ccall((:cudnnConvolutionBiasActivationForward, libcudnn), cudnnStatus_t, (cudnnHandle_t, Ptr{Nothing}, cudnnTensorDescriptor_t, Ptr{Nothing}, cudnnFilterDescriptor_t, Ptr{Nothing}, cudnnConvolutionDescriptor_t, cudnnConvolutionFwdAlgo_t, Ptr{Nothing}, Csize_t, Ptr{Nothing}, cudnnTensorDescriptor_t, Ptr{Nothing}, cudnnTensorDescriptor_t, Ptr{Nothing}, cudnnActivationDescriptor_t, cudnnTensorDescriptor_t, Ptr{Nothing}), handle, alpha1, xDesc, x, wDesc, w, convDesc, algo, workSpace, workSpaceSizeInBytes, alpha2, yDesc, y, biasDesc, bias, activationDesc, yDesc, y)
 end
 
 function cudnnConvolutionBiasActivationForward(y::CuArray{T,N}, x::CuArray{T,N}, w::CuArray{T,N}, bias::CuArray{T,N};
@@ -196,7 +196,7 @@ function cudnnConvolutionBackwardFilter(dw::CuArray{T,N}, x::CuArray{T,N}, w::Cu
 end
 
 function cudnnConvolutionBackwardBias(handle, alpha, dyDesc, dy, beta, dbDesc, db)
-    @check ccall((:cudnnConvolutionBackwardBias, libcudnn), cudnnStatus_t, (cudnnHandle_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}), handle, alpha, dyDesc, dy, beta, dbDesc, db)
+    @check ccall((:cudnnConvolutionBackwardBias, libcudnn), cudnnStatus_t, (cudnnHandle_t, Ptr{Nothing}, cudnnTensorDescriptor_t, Ptr{Nothing}, Ptr{Nothing}, cudnnTensorDescriptor_t, Ptr{Nothing}), handle, alpha, dyDesc, dy, beta, dbDesc, db)
 end
 
 function cudnnConvolutionBackwardBias(db::CuArray{T,N}, dy::CuArray{T,N}; handle=libcudnn_handle[], alpha=1, beta=0) where {T,N}
@@ -232,7 +232,7 @@ function cudnnPoolingBackward(dx::CuArray{T,N}, dy::CuArray{T,N}, x::CuArray{T,N
 end
 
 function cudnnActivationForward(handle, activationDesc, alpha, xDesc, x, beta, yDesc, y)
-    @check ccall((:cudnnActivationForward, libcudnn), cudnnStatus_t, (cudnnHandle_t, cudnnActivationDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}), handle, activationDesc, alpha, xDesc, x, beta, yDesc, y)
+    @check ccall((:cudnnActivationForward, libcudnn), cudnnStatus_t, (cudnnHandle_t, cudnnActivationDescriptor_t, Ptr{Nothing}, cudnnTensorDescriptor_t, Ptr{Nothing}, Ptr{Nothing}, cudnnTensorDescriptor_t, Ptr{Nothing}), handle, activationDesc, alpha, xDesc, x, beta, yDesc, y)
 end
 
 function cudnnActivationForward(y::CuArray{T,N}, x::CuArray{T,N}; handle=libcudnn_handle[],
@@ -244,7 +244,7 @@ function cudnnActivationForward(y::CuArray{T,N}, x::CuArray{T,N}; handle=libcudn
 end
 
 function cudnnActivationBackward(handle, activationDesc, alpha, yDesc, y, dyDesc, dy, xDesc, x, beta, dxDesc, dx)
-    @check ccall((:cudnnActivationBackward, libcudnn), cudnnStatus_t, (cudnnHandle_t, cudnnActivationDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}), handle, activationDesc, alpha, yDesc, y, dyDesc, dy, xDesc, x, beta, dxDesc, dx)
+    @check ccall((:cudnnActivationBackward, libcudnn), cudnnStatus_t, (cudnnHandle_t, cudnnActivationDescriptor_t, Ptr{Nothing}, cudnnTensorDescriptor_t, Ptr{Nothing}, cudnnTensorDescriptor_t, Ptr{Nothing}, cudnnTensorDescriptor_t, Ptr{Nothing}, Ptr{Nothing}, cudnnTensorDescriptor_t, Ptr{Nothing}), handle, activationDesc, alpha, yDesc, y, dyDesc, dy, xDesc, x, beta, dxDesc, dx)
 end
 
 function cudnnActivationBackward(dx::CuArray{T,N}, x::CuArray{T,N}, y::CuArray{T,N}, dy::CuArray{T,N};
@@ -256,7 +256,7 @@ function cudnnActivationBackward(dx::CuArray{T,N}, x::CuArray{T,N}, y::CuArray{T
 end
 
 function cudnnAddTensor(handle, alpha, aDesc, A, beta, cDesc, C)
-    @check ccall((:cudnnAddTensor, libcudnn), cudnnStatus_t, (cudnnHandle_t, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}, Ptr{Void}, cudnnTensorDescriptor_t, Ptr{Void}), handle, alpha, aDesc, A, beta, cDesc, C)
+    @check ccall((:cudnnAddTensor, libcudnn), cudnnStatus_t, (cudnnHandle_t, Ptr{Nothing}, cudnnTensorDescriptor_t, Ptr{Nothing}, Ptr{Nothing}, cudnnTensorDescriptor_t, Ptr{Nothing}), handle, alpha, aDesc, A, beta, cDesc, C)
 end
 
 function cudnnAddTensor(A::CuArray{T,N}, C::CuArray{T,N}; handle=libcudnn_handle[], alpha=1,

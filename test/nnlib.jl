@@ -4,7 +4,6 @@ using NNlib: conv, ∇conv_data, ∇conv_filter,
 
 @info("Testing CuArrays/CUDNN")
 
-
 @testset "NNlib" begin
   @test testf(conv, rand(Float64, 10, 10, 3, 1), rand(Float64, 2, 2, 3, 4))
   @test testf(∇conv_data, rand(Float64, 9, 9, 4, 1), rand(Float64, 10, 10, 3, 1), rand(Float64, 2, 2, 3, 4))
