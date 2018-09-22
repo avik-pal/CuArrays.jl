@@ -1,8 +1,6 @@
 using NNlib: conv, ∇conv_data, ∇conv_filter,
   maxpool, meanpool, ∇maxpool, ∇meanpool,
   softmax, ∇softmax, logsoftmax, ∇logsoftmax
-using CuArrays.CUDNN: ∇conv_bias!, cudnnAddTensor,
-  cudnnActivationForward, cudnnActivationBackward
 
 @info("Testing CuArrays/CUDNN")
 
@@ -10,7 +8,7 @@ using CuArrays.CUDNN: ∇conv_bias!, cudnnAddTensor,
   @test testf(conv, rand(Float64, 10, 10, 3, 1), rand(Float64, 2, 2, 3, 4))
   @test testf(∇conv_data, rand(Float64, 9, 9, 4, 1), rand(Float64, 10, 10, 3, 1), rand(Float64, 2, 2, 3, 4))
   @test testf(∇conv_filter, rand(Float64, 9, 9, 4, 1), rand(Float64, 10, 10, 3, 1), rand(Float64, 2, 2, 3, 4))
-  @test testf(∇conv_bias!, rand(Float64, 10), rand(Float64, 10, 10, 10, 1))
+  @test testf(CuArrays.CUDNN.∇conv_bias!, rand(Float64, 1, 1, 10, 1), rand(Float64, 10, 10, 10, 1))
 
   @test testf(conv, rand(Float64, 10, 10, 10, 3, 1), rand(Float64, 2, 2, 2, 3, 4))
   @test testf(∇conv_data, rand(Float64, 9, 9, 9, 4, 1), rand(Float64, 10, 10, 10, 3, 1), rand(Float64, 2, 2, 2, 3, 4))
@@ -35,7 +33,7 @@ using CuArrays.CUDNN: ∇conv_bias!, cudnnAddTensor,
 end
 
 @testset "Activations and Other Ops" begin
-  @test testf(cudnnAddTensor, rand(Float64, 10, 10, 3, 1), rand(Float64, 10, 10, 3, 1))
-  @test testf(cudnnActivationForward, rand(Float64, 10, 10, 3, 1), rand(Float64, 10, 10, 3, 1))
-  @test testf(cudnnActivationBackward, rand(Float64, 10, 10, 3, 1), rand(Float64, 10, 10, 3, 1), rand(Float64, 10, 10, 3, 1), randf(Float64, 10, 10, 3, 1))
+  @test testf(CuArrays.CUDNN.cudnnAddTensor, rand(Float64, 10, 10, 3, 1), rand(Float64, 10, 10, 3, 1))
+  @test testf(CuArrays.CUDNN.cudnnActivationForward, rand(Float64, 10, 10, 3, 1), rand(Float64, 10, 10, 3, 1))
+  @test testf(CuArrays.CUDNN.cudnnActivationBackward, rand(Float64, 10, 10, 3, 1), rand(Float64, 10, 10, 3, 1), rand(Float64, 10, 10, 3, 1), rand(Float64, 10, 10, 3, 1))
 end
