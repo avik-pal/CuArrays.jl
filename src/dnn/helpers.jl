@@ -123,8 +123,8 @@ Base.unsafe_convert(::Type{cudnnActivationDescriptor_t}, ad::ActivationDesc)=ad.
 function ActivationDesc(mode, coeff, reluNanOpt=CUDNN_NOT_PROPAGATE_NAN)
     ad = Ref{cudnnActivationDescriptor_t}()
     cudnnCreateActivationDescriptor(ad)
-    cudnnSetActivationDescriptor(ad[1],mode,reluNanOpt,coeff)
-    this = ActivationDesc(ad[1])
+    cudnnSetActivationDescriptor(ad[],mode,reluNanOpt,coeff)
+    this = ActivationDesc(ad[])
     finalizer(this, free)
     return this
 end

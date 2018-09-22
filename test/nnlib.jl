@@ -1,6 +1,8 @@
 using NNlib: conv, ∇conv_data, ∇conv_filter,
   maxpool, meanpool, ∇maxpool, ∇meanpool,
   softmax, ∇softmax, logsoftmax, ∇logsoftmax
+using CuArrays.CUDNN: ∇conv_bias!, cudnnAddTensor,
+  cudnnActivationForward, cudnnActivationBackward
 
 @info("Testing CuArrays/CUDNN")
 
@@ -8,6 +10,7 @@ using NNlib: conv, ∇conv_data, ∇conv_filter,
   @test testf(conv, rand(Float64, 10, 10, 3, 1), rand(Float64, 2, 2, 3, 4))
   @test testf(∇conv_data, rand(Float64, 9, 9, 4, 1), rand(Float64, 10, 10, 3, 1), rand(Float64, 2, 2, 3, 4))
   @test testf(∇conv_filter, rand(Float64, 9, 9, 4, 1), rand(Float64, 10, 10, 3, 1), rand(Float64, 2, 2, 3, 4))
+  @test testf(∇conv_bias!, rand(Float64, 10), rand(Float64, 10, 10, 10, 1))
 
   @test testf(conv, rand(Float64, 10, 10, 10, 3, 1), rand(Float64, 2, 2, 2, 3, 4))
   @test testf(∇conv_data, rand(Float64, 9, 9, 9, 4, 1), rand(Float64, 10, 10, 10, 3, 1), rand(Float64, 2, 2, 2, 3, 4))
@@ -29,4 +32,10 @@ using NNlib: conv, ∇conv_data, ∇conv_filter,
     @test testf(logsoftmax, rand(Float64, dims))
     @test testf(∇logsoftmax, rand(Float64, dims), rand(Float64, dims))
   end
+end
+
+@testset "Activations and Other Ops" begin
+  @test testf(cudnnAddTensor, rand(Float64, 10, 10, 3, 1), rand(Float64, 10, 10, 3, 1))
+  @test testf(cudnnActivationForward, rand(Float64, 10, 10, 3, 1), rand(Float64, 10, 10, 3, 1))
+  @test testf(cudnnActivationBackward, rand(Float64, 10, 10, 3, 1), rand(Float64, 10, 10, 3, 1), rand(Float64, 10, 10, 3, 1), randf(Float64, 10, 10, 3, 1))
 end
