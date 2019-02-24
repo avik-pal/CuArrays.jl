@@ -30,6 +30,7 @@ end
 include("libcudnn.jl")
 include("helpers.jl")
 include("nnlib.jl")
+include("upsample.jl")
 
 version() = VersionNumber(cudnnGetProperty(CUDAapi.MAJOR_VERSION),
                           cudnnGetProperty(CUDAapi.MINOR_VERSION),
